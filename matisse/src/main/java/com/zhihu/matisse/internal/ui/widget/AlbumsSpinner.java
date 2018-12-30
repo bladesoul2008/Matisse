@@ -20,9 +20,13 @@ import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.ListPopupWindow;
+import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
@@ -39,13 +43,28 @@ public class AlbumsSpinner {
     private ListPopupWindow mListPopupWindow;
     private AdapterView.OnItemSelectedListener mOnItemSelectedListener;
 
-    public AlbumsSpinner(@NonNull Context context) {
+    public AlbumsSpinner(@NonNull Context context, final Toolbar toolbar) {
         mListPopupWindow = new ListPopupWindow(context, null, R.attr.listPopupWindowStyle);
         mListPopupWindow.setModal(true);
-        float density = context.getResources().getDisplayMetrics().density;
-        mListPopupWindow.setContentWidth((int) (216 * density));
-        mListPopupWindow.setHorizontalOffset((int) (16 * density));
-        mListPopupWindow.setVerticalOffset((int) (-48 * density));
+        final float density = context.getResources().getDisplayMetrics().density;
+        int width = context.getResources().getDisplayMetrics().widthPixels;
+        mListPopupWindow.setContentWidth(width);
+        mListPopupWindow.setVerticalOffset(0);
+//        mListPopupWindow.setHorizontalOffset((int) (16 * density));
+
+
+        ViewTreeObserver vto = toolbar.getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    toolbar.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                }
+                int height = toolbar.getHeight();
+
+            }
+        });
+
 
         mListPopupWindow.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
