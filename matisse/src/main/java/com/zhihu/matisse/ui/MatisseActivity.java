@@ -119,6 +119,7 @@ public class MatisseActivity extends AppCompatActivity implements
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setDisplayHomeAsUpEnabled(true);
+        toolbar.setPadding(0, 0, 0, 0);
         Drawable navigationIcon = toolbar.getNavigationIcon();
         TypedArray ta = getTheme().obtainStyledAttributes(new int[]{R.attr.album_element_color});
         int color = ta.getColor(0, 0);
@@ -142,7 +143,7 @@ public class MatisseActivity extends AppCompatActivity implements
         updateBottomToolbar();
 
         mAlbumsAdapter = new AlbumsAdapter(this, null, false);
-        mAlbumsSpinner = new AlbumsSpinner(this,toolbar);
+        mAlbumsSpinner = new AlbumsSpinner(this, toolbar);
         mAlbumsSpinner.setOnItemSelectedListener(this);
         mAlbumsSpinner.setSelectedTextView((TextView) findViewById(R.id.selected_album));
         mAlbumsSpinner.setPopupAnchorView(findViewById(R.id.toolbar));

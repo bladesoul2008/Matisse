@@ -15,10 +15,14 @@
  */
 package com.zhihu.matisse.internal.ui.widget;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -27,8 +31,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.CursorAdapter;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.zhihu.matisse.R;
@@ -42,8 +48,10 @@ public class AlbumsSpinner {
     private TextView mSelected;
     private ListPopupWindow mListPopupWindow;
     private AdapterView.OnItemSelectedListener mOnItemSelectedListener;
+    private Activity activity;
 
     public AlbumsSpinner(@NonNull Context context, final Toolbar toolbar) {
+        activity = (Activity) context;
         mListPopupWindow = new ListPopupWindow(context, null, R.attr.listPopupWindowStyle);
         mListPopupWindow.setModal(true);
         final float density = context.getResources().getDisplayMetrics().density;
@@ -52,16 +60,10 @@ public class AlbumsSpinner {
         mListPopupWindow.setVerticalOffset(0);
 //        mListPopupWindow.setHorizontalOffset((int) (16 * density));
 
-
-        ViewTreeObserver vto = toolbar.getViewTreeObserver();
-        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        mListPopupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
             @Override
-            public void onGlobalLayout() {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    toolbar.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                }
-                int height = toolbar.getHeight();
-
+            public void onDismiss() {
+                setBackgroundAlpha(activity,1f);
             }
         });
 
@@ -136,9 +138,21 @@ public class AlbumsSpinner {
                         mAdapter.getCount() > MAX_SHOWN_COUNT ? itemHeight * MAX_SHOWN_COUNT
                                 : itemHeight * mAdapter.getCount());
                 mListPopupWindow.show();
+                setBackgroundAlpha(activity,0.3f);
             }
         });
         mSelected.setOnTouchListener(mListPopupWindow.createDragToOpenListener(mSelected));
+    }
+
+    public static void setBackgroundAlpha(Activity activity, float bgAlpha) {
+        WindowManager.LayoutParams lp = activity.getWindow().getAttributes();
+        lp.alpha = bgAlpha;
+        if (bgAlpha == 1) {
+            activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);//不移除该Flag的话,在有视频的页面上的视频会出现黑屏的bug
+        } else {
+            activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);//此行代码主要是解决在华为手机上半透明效果无效的bug
+        }
+        activity.getWindow().setAttributes(lp);
     }
 
     public void setPopupAnchorView(View view) {
